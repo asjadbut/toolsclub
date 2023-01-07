@@ -1,18 +1,26 @@
 const express = require("express");
 const multer = require("multer");
+var fs = require('fs-extra')
 const app = express();
 const port = 3000;
 const path = require("path");
-const { docxToPdf } = require("./backend/docxToPdf");
-const { docxToPdfFilter } = require("./filters/docxToPdfFilter");
-const {docx_odtToDoc} = require("./backend/docx_odtToDoc")
-const {docx_odtToDocFilter} = require("./filters/docx_odtToDocFilter")
-const {doc_odtToDocx} = require("./backend/doc_odtToDocx")
-const {doc_odtToDocxFilter} = require("./filters/doc_odtToDocxFilter")
-const {doc_docxToOdt} = require("./backend/doc_docxToOdt")
-const {doc_docxToOdtFilter} = require("./filters/doc_docxToOdtFilter")
-const {doc_docxToTxt} = require("./backend/doc_docxToTxt")
-const {doc_docxToTxtFilter} = require("./filters/doc_docxToTxtFilter")
+const { docxToPdf } = require("./backend/document/docxToPdf");
+const { docxToPdfFilter } = require("./filters/document-filters/docxToPdfFilter");
+const { docx_odtToDoc } = require("./backend/document/docx_odtToDoc");
+const { docx_odtToDocFilter } = require("./filters/document-filters/docx_odtToDocFilter");
+const { doc_odtToDocx } = require("./backend/document/doc_odtToDocx");
+const { doc_odtToDocxFilter } = require("./filters/document-filters/doc_odtToDocxFilter");
+const { doc_docxToOdt } = require("./backend/document/doc_docxToOdt");
+const { doc_docxToOdtFilter } = require("./filters/document-filters/doc_docxToOdtFilter");
+const { doc_docxToTxt } = require("./backend/document/doc_docxToTxt");
+const { doc_docxToTxtFilter } = require("./filters/document-filters/doc_docxToTxtFilter");
+const { png_svgToJpg } = require("./backend/image/png_svgToJpg");
+const { png_svgToJpgFilter } = require("./filters/image-filters/png_svgToJpgFilter");
+const { jpg_svgToPng } = require("./backend/image/jpg_svgToPng");
+const { jpg_svgToPngFilter } = require("./filters/image-filters/jpg_svgToPngFilter");
+const { toArchive } = require("./backend/archive/toArchive");
+const { toArchiveFilter } = require("./filters/archive-filters/toArchiveFilter");
+
 const { multerStorage } = require("./multerConfig");
 
 
@@ -73,3 +81,40 @@ app.post("/converters/document-converters/doc-docx-to-txt.html", upload5.single(
 
 
 
+
+// ************************** PNG | SVG TO JPG ***************************
+
+const upload6 = multer({ storage: multerStorage, fileFilter: png_svgToJpgFilter });
+
+app.post("/converters/image-converters/png-svg-to-jpg.html", upload6.single("png_svgFile"), (req, res) => {
+  png_svgToJpg(req, res);
+});
+
+
+
+
+// ************************** JPG | SVG TO PNG ***************************
+
+const upload7 = multer({ storage: multerStorage, fileFilter: jpg_svgToPngFilter });
+
+app.post("/converters/image-converters/jpg-svg-to-png.html", upload7.single("jpg_svgFile"), (req, res) => {
+  jpg_svgToPng(req, res);
+});
+
+
+// ************************** FILE | FILES TO ZIP ***************************
+
+const upload8 = multer({ storage: multerStorage, fileFilter: toArchiveFilter });
+
+app.post("/converters/archive-converters/to-zip.html", upload8.array("zipFiles"), (req, res) => {
+  var userFolderPath = `${req.body.userId}`;
+  fs.mkdirSync(userFolderPath, { recursive: true });
+  req.files.forEach(file => {
+    fs.move(file.path, `${userFolderPath}/${file.filename}`, { overwrite: true }, function (err) {
+      if (err) return console.error(err)
+      console.log("success!")
+    })
+
+  });
+  //toArchive(req, res,"zip");
+});
