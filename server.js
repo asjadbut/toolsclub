@@ -108,13 +108,19 @@ const upload8 = multer({ storage: multerStorage, fileFilter: toArchiveFilter });
 
 app.post("/converters/archive-converters/to-zip.html", upload8.array("zipFiles"), (req, res) => {
   var userFolderPath = `${req.body.userId}`;
+  toArchive(req, res, userFolderPath, "zip");
+
+});
+
+
+// ************************** FILE | FILES TO TAR ***************************
+
+
+app.post("/converters/archive-converters/to-tar.html", upload8.array("tarFiles"), (req, res) => {
+  var userFolderPath = `${req.body.userId}`;
   fs.mkdirSync(userFolderPath, { recursive: true });
   req.files.forEach(file => {
-    fs.move(file.path, `${userFolderPath}/${file.filename}`, { overwrite: true }, function (err) {
-      if (err) return console.error(err)
-      console.log("success!")
-    })
-
-  });
-  //toArchive(req, res,"zip");
+    fs.moveSync(file.path, `${userFolderPath}/${file.filename}`, { overwrite: true });
+  })
+  toArchive(req, res, userFolderPath, "tar");
 });
