@@ -15,19 +15,19 @@ const png_svgToJpg = function (req, res) {
           if (err) {
             res.send("Some error occurred during the file reading process.");
           }
-          image.write(OutputFilePath,(err)=>{
+          image.write(OutputFilePath, (err) => {
             if (err) {
               res.send("Some error occurred during the file writing process.");
             }
-            DownloadFile(res,req.file.path,OutputFilePath);
+            DownloadFile(res, req.file.path, OutputFilePath);
           });
         });
         break;
       case ".svg":
-        convertFile(req.file.path, { height: 512, width: 512 }).then(()=>{
-          DownloadFile(res,req.file.path,req.file.path.split(".")[0]+".jpeg");
+        convertFile(req.file.path, { height: 512, width: 512 }).then(() => {
+          DownloadFile(res, req.file.path, req.file.path.split(".")[0] + ".jpeg");
         })
-        
+
         break;
     }
 
